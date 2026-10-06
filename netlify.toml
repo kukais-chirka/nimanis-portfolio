@@ -3,4 +3,5 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  # Astro 7 requires Node >=22.12.0. Keep this in step with "engines" in package.json.
+  NODE_VERSION = "22"
