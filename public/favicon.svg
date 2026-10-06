@@ -3,5 +3,5 @@
     .m { fill: none; stroke: #18181B; stroke-width: 12; stroke-linecap: round; }
     @media (prefers-color-scheme: dark) { .m { stroke: #F4F4F5; } }
   </style>
-  <path class="m" d="M66.6 21.5 A32 32 0 1 0 66.6 70.5"/>
+  <path class="m" d="M70.5 25.4 A32 32 0 1 0 70.5 66.6"/>
 </svg>
