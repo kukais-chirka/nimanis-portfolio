@@ -1,0 +1,1544 @@
+---
+// Portfolio page: website developer for service businesses.
+// Dials: DESIGN_VARIANCE 7 / MOTION_INTENSITY 5 / VISUAL_DENSITY 3
+// Theme: light-first. Follows prefers-color-scheme, with a manual toggle that persists.
+// Accent: single terracotta (#C2451F light / #FF7A4D dark) used page-wide.
+// Radius: one system, 14px everywhere. Buttons, cards, media, inputs.
+// Font: Outfit, self-hosted via @fontsource-variable (no external font request).
+// TODO before production: swap picsum.photos seeds for real client photography.
+
+import "@fontsource-variable/outfit";
+// Inlined so the wordmark inherits currentColor and works in both themes.
+import chiiWordmark from "../../public/brand/chii-wordmark.svg?raw";
+import {
+  content,
+  clients,
+  workAssets,
+  statValues,
+  offerPrice,
+  localeMeta,
+  EMAIL,
+  SITE,
+  WORDMARK,
+  type Locale,
+} from "../i18n/content";
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+const t = content[lang];
+const other: Locale = lang === "lv" ? "en" : "lv";
+
+const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
+---
+
+<html lang={localeMeta[lang].htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.meta.title}</title>
+    <meta name="description" content={t.meta.description} />
+    <link rel="canonical" href={`${SITE}${localeMeta[lang].path}`} />
+    <link rel="alternate" hreflang="lv" href={`${SITE}/`} />
+    <link rel="alternate" hreflang="en" href={`${SITE}/en/`} />
+    <link rel="alternate" hreflang="x-default" href={`${SITE}/`} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#F4F4F5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121214" media="(prefers-color-scheme: dark)" />
+    <script is:inline>
+      // Applied before paint so a stored override never flashes the wrong theme.
+      (function () {
+        try {
+          var saved = localStorage.getItem("theme");
+          if (saved === "light" || saved === "dark") {
+            document.documentElement.setAttribute("data-theme", saved);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="preload" as="image" href="/images/nimanis-portrait.webp" />
+  </head>
+
+  <body>
+    <a class="skip" href="#main">{t.skip}</a>
+
+    <!-- Header: one line at desktop, 68px tall -->
+    <header class="site-head">
+      <div class="shell head-inner">
+        <a class="wordmark" href={localeMeta[lang].path} aria-label={WORDMARK}>
+          <span class="wordmark-art" set:html={chiiWordmark} />
+        </a>
+        <nav class="head-nav" aria-label={t.nav.label}>
+          <a href="#services">{t.nav.services}</a>
+          <a href="#offer">{t.nav.offer}</a>
+          <a href="#work">{t.nav.work}</a>
+          <a href="#process">{t.nav.process}</a>
+          <a href="#faq">{t.nav.faq}</a>
+        </nav>
+        <a class="lang-switch" href={localeMeta[other].path} hreflang={other} lang={other}>
+          <span class="sr-only">{t.lang.label}: </span>{localeMeta[other].label}
+        </a>
+        <button
+          class="theme-toggle"
+          type="button"
+          data-theme-toggle
+          aria-pressed="false"
+          data-to-dark={t.theme.toDark}
+          data-to-light={t.theme.toLight}
+        >
+          <span class="sr-only">{t.theme.before}</span><span data-theme-label>{t.theme.toDark}</span
+          ><span class="sr-only">{t.theme.after}</span>
+        </button>
+        <a class="btn btn-primary btn-sm" href="#contact">{t.cta.primary}</a>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- 1. HERO. Layout family: asymmetric split -->
+      <section class="hero">
+        <div class="shell hero-grid">
+          <div class="hero-copy" data-enter>
+            <h1>
+              {t.hero.headlineA}<br />
+              {t.hero.headlineB}
+            </h1>
+            <p class="lede">{t.hero.lede}</p>
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="#contact">{t.cta.primary}</a>
+              <a class="btn btn-ghost" href="#work">{t.cta.secondary}</a>
+            </div>
+          </div>
+          <div class="hero-media" data-enter data-enter-delay="1">
+            <img
+              src="/images/nimanis-portrait.webp"
+              alt={t.hero.portraitAlt}
+              width="900"
+              height="904"
+              fetchpriority="high"
+              decoding="async"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. TRUST. Layout family: logo wall -->
+      <section class="proof" aria-labelledby="proof-h">
+        <div class="shell">
+          <h2 id="proof-h" class="proof-h">{t.proof.heading}</h2>
+          <ul class="logo-wall">
+            {
+              clients.map((c) => (
+                <li>
+                  <a href={c.href} rel="noopener">
+                    <span
+                      class="logo-art logo-mask"
+                      role="img"
+                      aria-label={c.name}
+                      style={`--mask:url('${c.mask}');--logo-w:${c.width};--logo-ar:${c.ratio}`}
+                    />
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </section>
+
+      <!-- 3. STATEMENT. Layout family: offset editorial single column -->
+      <section class="statement">
+        <div class="shell">
+          <div class="statement-inner" data-reveal>
+            <h2>{t.statement.heading}</h2>
+            <p>{t.statement.body}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. OFFER. Layout family: contained accent panel, centre-aligned.
+           The only centred block on the page, so it reads as the conversion moment. -->
+      <section class="offer" id="offer" aria-labelledby="offer-h">
+        <div class="shell">
+          <div class="offer-panel" data-reveal>
+            <h2 id="offer-h">{t.offer.heading}</h2>
+            <p class="offer-body">{t.offer.body}</p>
+            <p class="offer-price">{offerPrice}</p>
+            <ul class="offer-list">
+              {t.offer.list.map((item) => <li>{item}</li>)}
+            </ul>
+            <a class="btn btn-oncolor" href="#contact">{t.cta.primary}</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. SERVICES. Layout family: asymmetric bento, exactly 4 cells -->
+      <section class="services" id="services" aria-labelledby="services-h">
+        <div class="shell">
+          <h2 id="services-h" class="sec-h">{t.services.heading}</h2>
+          <div class="bento">
+            <article class="cell cell-wide" data-reveal>
+              <h3>{t.services.cells[0].title}</h3>
+              <p>{t.services.cells[0].body}</p>
+            </article>
+
+            <article class="cell cell-media" data-reveal data-reveal-delay="1">
+              <img
+                src="https://picsum.photos/seed/search-results-on-phone-outdoors/900/700"
+                alt={t.services.mediaAlt}
+                loading="lazy"
+                width="900"
+                height="700"
+                decoding="async"
+              />
+              <div class="cell-body">
+                <h3>{t.services.cells[1].title}</h3>
+                <p>{t.services.cells[1].body}</p>
+              </div>
+            </article>
+
+            <article class="cell" data-reveal>
+              <h3>{t.services.cells[2].title}</h3>
+              <p>{t.services.cells[2].body}</p>
+            </article>
+
+            <article class="cell" data-reveal>
+              <h3>{t.services.cells[3].title}</h3>
+              <p>{t.services.cells[3].body}</p>
+            </article>
+
+            <article class="cell cell-tint cell-wide" data-reveal data-reveal-delay="1">
+              <h3>{t.services.cells[4].title}</h3>
+              <p>{t.services.cells[4].body}</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 6. WORK. Layout family: staggered offset gallery -->
+      <section class="work" id="work" aria-labelledby="work-h">
+        <div class="shell">
+          <h2 id="work-h" class="sec-h">{t.work.heading}</h2>
+          <div class="work-stagger">
+            {
+              work.map((w, i) => (
+                <article class={`piece piece-${i}`} data-reveal>
+                  <div class="piece-media" style={`aspect-ratio:${w.ratio}`}>
+                    <img
+                      src={w.img}
+                      alt={w.alt ?? `${w.client}, ${w.sector}`}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                  <div class="piece-meta">
+                    <h3>
+                      <a href={w.href} rel="noopener">
+                        {w.client}
+                      </a>
+                    </h3>
+                    <p class="piece-sector">{w.sector}</p>
+                    <p class="piece-line">{w.line}</p>
+                  </div>
+                </article>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. RESULTS. Layout family: full-bleed tinted stat band -->
+      <!-- Figures supplied by the business owner. Keep the evidence for the first two
+           on file, and only name a client once that client has confirmed it. -->
+      <section class="results" aria-labelledby="results-h">
+        <div class="shell">
+          <h2 id="results-h" class="sr-only">{t.results.srHeading}</h2>
+          <dl class="stat-band">
+            {
+              statValues.map((value, i) => (
+                <div
+                  class={i === 0 ? "stat stat-lg" : "stat"}
+                  data-reveal
+                  data-reveal-delay={i > 0 ? String(i) : undefined}
+                >
+                  <dt>{value}</dt>
+                  <dd>{t.results.labels[i]}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </section>
+
+      <!-- 7. PROCESS. Layout family: vertical rail with sticky heading -->
+      <section class="process" id="process" aria-labelledby="process-h">
+        <div class="shell process-grid">
+          <div class="process-head">
+            <h2 id="process-h" class="sec-h">{t.process.heading}</h2>
+            <p>{t.process.note}</p>
+          </div>
+          <ol class="rail">
+            {
+              t.process.steps.map((s) => (
+                <li data-reveal>
+                  <h3>{s.title}</h3>
+                  <p>{s.body}</p>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </section>
+
+      <!-- 8. TESTIMONIALS. Layout family: offset quote and portrait pair -->
+      <!-- Names and companies are real. The quote wording below is still a DRAFT written
+           for them, not their own words. Get both quotes approved in writing by Laura and
+           Marta before this page goes live, and swap in whatever they actually say. -->
+      <section class="voices" aria-labelledby="voices-h">
+        <div class="shell">
+          <h2 id="voices-h" class="sec-h">{t.voices.heading}</h2>
+          <div class="voice-pair">
+            {
+              t.voices.quotes.map((v, i) => (
+                <figure
+                  class={i === 0 ? "voice" : "voice voice-offset"}
+                  data-reveal
+                  data-reveal-delay={i > 0 ? "1" : undefined}
+                >
+                  <blockquote set:html={v.quote} />
+                  <figcaption>
+                    <span>
+                      <strong>{v.name}</strong>
+                      {v.role}
+                    </span>
+                  </figcaption>
+                </figure>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. FAQ. Layout family: disclosure accordion -->
+      <section class="faq" id="faq" aria-labelledby="faq-h">
+        <div class="shell faq-grid">
+          <h2 id="faq-h" class="sec-h">{t.faq.heading}</h2>
+          <div class="faq-list">
+            {
+              t.faq.items.map((f) => (
+                <details data-reveal>
+                  <summary>
+                    <span>{f.q}</span>
+                    <i class="plus" aria-hidden="true" />
+                  </summary>
+                  <p>{f.a}</p>
+                </details>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. CONTACT. Layout family: split form -->
+      <section class="contact" id="contact" aria-labelledby="contact-h">
+        <div class="shell contact-grid">
+          <div class="contact-copy" data-reveal>
+            <h2 id="contact-h">{t.contact.heading}</h2>
+            <p>{t.contact.body}</p>
+            <p class="contact-direct">
+              {t.contact.directPrefix} <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+            </p>
+          </div>
+
+          <form
+            class="form"
+            id="lead-form"
+            novalidate
+            data-reveal
+            data-reveal-delay="1"
+            data-label-idle={t.cta.primary}
+            data-label-sending={t.contact.form.sending}
+            data-msg-invalid={t.contact.form.invalid}
+            data-msg-ok={t.contact.form.ok}
+            data-msg-fail={t.contact.form.fail}
+          >
+            <div class="field">
+              <label for="f-name">{t.contact.form.name}</label>
+              <input id="f-name" name="name" type="text" autocomplete="name" required />
+              <p class="err" data-err-for="f-name" hidden>{t.contact.form.errName}</p>
+            </div>
+
+            <div class="field">
+              <label for="f-business">{t.contact.form.business}</label>
+              <input id="f-business" name="business" type="text" autocomplete="organization" required />
+              <p class="hint">{t.contact.form.businessHint}</p>
+              <p class="err" data-err-for="f-business" hidden>{t.contact.form.errBusiness}</p>
+            </div>
+
+            <div class="field">
+              <label for="f-email">{t.contact.form.email}</label>
+              <input id="f-email" name="email" type="email" autocomplete="email" required />
+              <p class="err" data-err-for="f-email" hidden>{t.contact.form.errEmail}</p>
+            </div>
+
+            <div class="field">
+              <label for="f-brief">{t.contact.form.brief}</label>
+              <textarea id="f-brief" name="brief" rows="4" required></textarea>
+              <p class="hint">{t.contact.form.briefHint}</p>
+              <p class="err" data-err-for="f-brief" hidden>{t.contact.form.errBrief}</p>
+            </div>
+
+            <button class="btn btn-primary btn-block" type="submit" data-submit>
+              <span data-label>{t.cta.primary}</span>
+            </button>
+
+            <p class="form-status" data-status role="status" aria-live="polite" hidden></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <div class="shell foot-inner">
+        <a class="wordmark" href={localeMeta[lang].path}>{t.brandFull}</a>
+        <nav class="foot-nav" aria-label={t.nav.footerLabel}>
+          <a href="#services">{t.nav.services}</a>
+          <a href="#offer">{t.nav.offer}</a>
+          <a href="#work">{t.nav.work}</a>
+          <a href="#process">{t.nav.process}</a>
+          <a href="#faq">{t.nav.faq}</a>
+          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+          <a href={localeMeta[other].path} hreflang={other} lang={other}>{t.lang.switchTo}</a>
+        </nav>
+        <p class="foot-note">{t.footer.note}</p>
+      </div>
+    </footer>
+
+    <style is:global>
+      /* ---------- tokens ---------- */
+      :root {
+        --bg: #f4f4f5;
+        --surface: #fcfcfd;
+        --tint: #f6ece8;
+        --ink: #18181b;
+        --ink-soft: #52525b;
+        --line: #e0e0e3;
+        --accent: #c2451f;
+        --accent-ink: #ffffff;
+        --r: 14px; /* single radius system, page-wide */
+        --shell: 1240px;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      /* Dark tokens apply when the system asks for them, unless the user pinned light. */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #121214;
+          --surface: #1a1a1d;
+          --tint: #241a16;
+          --ink: #f4f4f5;
+          --ink-soft: #a1a1aa;
+          --line: #2d2d31;
+          --accent: #ff7a4d;
+          --accent-ink: #1a1a1d;
+        }
+      }
+
+      /* ...or when the user pins dark explicitly. */
+      :root[data-theme="dark"] {
+        --bg: #121214;
+        --surface: #1a1a1d;
+        --tint: #241a16;
+        --ink: #f4f4f5;
+        --ink-soft: #a1a1aa;
+        --line: #2d2d31;
+        --accent: #ff7a4d;
+        --accent-ink: #1a1a1d;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Outfit Variable", ui-sans-serif, system-ui, sans-serif;
+        font-size: 17px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        letter-spacing: -0.03em;
+        line-height: 1.08;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .shell {
+        width: 100%;
+        max-width: var(--shell);
+        margin-inline: auto;
+        padding-inline: 20px;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      .skip {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        z-index: 100;
+        background: var(--accent);
+        color: var(--accent-ink);
+        padding: 12px 18px;
+        border-radius: var(--r);
+      }
+      .skip:focus {
+        left: 12px;
+        top: 12px;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+        border-radius: 4px;
+      }
+
+      /* ---------- buttons ---------- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        gap: 8px;
+        padding: 14px 24px;
+        border-radius: var(--r);
+        border: 1px solid transparent;
+        font: inherit;
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 1;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+          transform 0.18s var(--ease),
+          background-color 0.18s var(--ease),
+          border-color 0.18s var(--ease);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: var(--accent-ink);
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+      }
+      .btn-primary:active {
+        transform: scale(0.98);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--ink);
+        border-color: var(--line);
+      }
+      .btn-ghost:hover {
+        border-color: var(--ink);
+        transform: translateY(-2px);
+      }
+      .btn-ghost:active {
+        transform: scale(0.98);
+      }
+      .btn-sm {
+        padding: 11px 18px;
+        font-size: 15px;
+      }
+      .btn-block {
+        width: 100%;
+      }
+      .btn[disabled] {
+        opacity: 0.6;
+        cursor: progress;
+        transform: none;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .btn {
+          transition: none;
+        }
+        .btn:hover {
+          transform: none;
+        }
+      }
+
+      /* ---------- header ---------- */
+      .site-head {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--line);
+      }
+      .head-inner {
+        height: 68px;
+        display: flex;
+        align-items: center;
+        gap: 28px;
+      }
+      .wordmark {
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: -0.04em;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+      }
+      .wordmark-art {
+        display: block;
+        width: 74px;
+      }
+      .wordmark-art svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .head-nav {
+        display: flex;
+        gap: 22px;
+        margin-left: auto;
+        font-size: 16px;
+      }
+      .head-nav a {
+        text-decoration: none;
+        color: var(--ink-soft);
+        transition: color 0.18s var(--ease);
+      }
+      .head-nav a:hover {
+        color: var(--ink);
+      }
+      .lang-switch {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--ink-soft);
+        text-decoration: none;
+        padding: 11px 4px;
+        transition: color 0.18s var(--ease);
+      }
+      .lang-switch:hover {
+        color: var(--ink);
+      }
+
+      .theme-toggle {
+        font: inherit;
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1;
+        color: var(--ink-soft);
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: var(--r);
+        padding: 11px 16px;
+        cursor: pointer;
+        transition:
+          color 0.18s var(--ease),
+          border-color 0.18s var(--ease);
+      }
+      .theme-toggle:hover {
+        color: var(--ink);
+        border-color: var(--ink-soft);
+      }
+      .theme-toggle:active {
+        transform: scale(0.98);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .theme-toggle {
+          transition: none;
+        }
+        .theme-toggle:active {
+          transform: none;
+        }
+      }
+
+      /* Latvian nav labels are long. Below 1024 they would wrap to a second
+         line, so the nav drops out and the CTA carries the header. */
+      @media (max-width: 1023px) {
+        .head-inner {
+          gap: 8px;
+        }
+        .head-nav {
+          display: none;
+        }
+        .lang-switch {
+          margin-left: auto;
+        }
+        .theme-toggle {
+          padding: 11px 12px;
+        }
+      }
+
+      /* ---------- 1. hero ---------- */
+      .hero {
+        padding-top: 72px;
+        padding-bottom: 88px;
+      }
+      .hero-grid {
+        display: grid;
+        gap: 48px;
+        align-items: center;
+      }
+      .hero-copy h1 {
+        /* Scale is planned against the hero asset: 2 lines at every breakpoint. */
+        font-size: clamp(2rem, 4.4vw, 3.2rem);
+        font-weight: 700;
+      }
+      .lede {
+        margin-top: 22px;
+        max-width: 46ch;
+        font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+        color: var(--ink-soft);
+      }
+      .hero-cta {
+        margin-top: 34px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      /* Cutout portrait on a tinted panel. The panel colour is a token, so the
+         background follows the theme instead of being baked into the image. */
+      .hero-media {
+        background: var(--tint);
+        border-radius: var(--r);
+        overflow: hidden;
+        aspect-ratio: 5 / 4;
+      }
+      .hero-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: bottom center;
+      }
+      @media (min-width: 900px) {
+        .hero {
+          padding-top: 80px;
+          padding-bottom: 96px;
+        }
+        .hero-grid {
+          grid-template-columns: 1.2fr 0.8fr;
+          gap: 56px;
+        }
+        .hero-media {
+          aspect-ratio: 4 / 5;
+          max-height: 62vh;
+        }
+      }
+
+      /* ---------- 2. logo wall ---------- */
+      .proof {
+        padding-block: 40px 72px;
+      }
+      .proof-h {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ink-soft);
+        letter-spacing: 0;
+        margin-bottom: 26px;
+      }
+      /* Flex row, not a grid: with two logos a stretched grid would leave empty columns. */
+      .logo-wall {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 24px 56px;
+      }
+      .logo-wall a {
+        display: flex;
+        text-decoration: none;
+      }
+      .logo-art {
+        display: block;
+        color: var(--ink-soft);
+        opacity: 0.75;
+        transition: opacity 0.2s var(--ease);
+      }
+      /* Raster logo painted as a mask so it takes currentColor in both themes. */
+      .logo-mask {
+        width: var(--logo-w, 120px);
+        aspect-ratio: var(--logo-ar, 4 / 1);
+        background-color: currentColor;
+        -webkit-mask-image: var(--mask);
+        mask-image: var(--mask);
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+      }
+      .logo-wall li:hover .logo-art {
+        opacity: 1;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .logo-art {
+          transition: none;
+        }
+      }
+
+      /* ---------- 3. statement ---------- */
+      .statement {
+        padding-block: 88px;
+        border-top: 1px solid var(--line);
+      }
+      .statement-inner {
+        max-width: 60ch;
+      }
+      .statement h2 {
+        font-size: clamp(1.9rem, 4.2vw, 3.1rem);
+      }
+      .statement p {
+        margin-top: 24px;
+        max-width: 52ch;
+        font-size: 1.1rem;
+        color: var(--ink-soft);
+      }
+      @media (min-width: 1024px) {
+        .statement-inner {
+          margin-left: 14vw;
+        }
+      }
+
+      /* ---------- shared section heading ---------- */
+      .sec-h {
+        font-size: clamp(1.7rem, 3.2vw, 2.5rem);
+        margin-bottom: 40px;
+      }
+
+      /* ---------- 4. bento ---------- */
+      .services {
+        padding-block: 88px;
+      }
+      .bento {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .cell {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--r);
+        padding: 32px;
+        overflow: hidden;
+      }
+      .cell h3 {
+        font-size: 1.4rem;
+      }
+      .cell p {
+        margin-top: 12px;
+        color: var(--ink-soft);
+        max-width: 48ch;
+      }
+      .cell-tint {
+        background: var(--tint);
+        border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+      }
+      .cell-media {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .cell-media img {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+      }
+      .cell-body {
+        padding: 28px 32px 32px;
+      }
+      @media (min-width: 900px) {
+        /* Four stacked text cells left, one full-height media cell right.
+           Exactly 5 cells, no filler, no cell stretched around dead space. */
+        .bento {
+          grid-template-columns: repeat(12, 1fr);
+        }
+        .bento .cell:nth-child(1) {
+          grid-column: 1 / span 7;
+          grid-row: 1;
+        }
+        .cell-media {
+          grid-column: 8 / span 5;
+          grid-row: 1 / span 4;
+        }
+        .bento .cell:nth-child(3) {
+          grid-column: 1 / span 7;
+          grid-row: 2;
+        }
+        .bento .cell:nth-child(4) {
+          grid-column: 1 / span 7;
+          grid-row: 3;
+        }
+        .bento .cell:nth-child(5) {
+          grid-column: 1 / span 7;
+          grid-row: 4;
+        }
+        .cell-media img {
+          flex: 1;
+          min-height: 0;
+          aspect-ratio: auto;
+        }
+      }
+
+      /* ---------- 5. offer ---------- */
+      .offer {
+        padding-block: 24px 88px;
+      }
+      .offer-panel {
+        background: var(--accent);
+        color: var(--accent-ink);
+        border-radius: var(--r);
+        padding: 48px 24px 52px;
+        text-align: center;
+      }
+      .offer-panel h2 {
+        font-size: clamp(1.6rem, 3vw, 2.3rem);
+        max-width: 18ch;
+        margin-inline: auto;
+      }
+      .offer-body {
+        margin: 18px auto 0;
+        max-width: 42ch;
+        opacity: 0.88;
+      }
+      .offer-price {
+        margin-top: 32px;
+        font-size: clamp(3rem, 7vw, 4.6rem);
+        font-weight: 700;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+      .offer-list {
+        list-style: none;
+        margin: 28px auto 0;
+        padding: 0;
+        max-width: 46ch;
+        display: grid;
+        gap: 10px;
+        opacity: 0.92;
+      }
+      .offer .btn-oncolor {
+        margin-top: 36px;
+        background: var(--accent-ink);
+        color: var(--accent);
+      }
+      .offer .btn-oncolor:hover {
+        transform: translateY(-2px);
+      }
+      .offer .btn-oncolor:active {
+        transform: scale(0.98);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .offer .btn-oncolor:hover {
+          transform: none;
+        }
+      }
+      @media (min-width: 768px) {
+        .offer-panel {
+          padding: 72px 48px 76px;
+        }
+      }
+
+      /* ---------- 6. work ---------- */
+      .work {
+        padding-block: 88px;
+        border-top: 1px solid var(--line);
+      }
+      .work-stagger {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 56px;
+      }
+      .piece-media {
+        border-radius: var(--r);
+        overflow: hidden;
+        background: var(--surface);
+      }
+      .piece-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s var(--ease);
+      }
+      .piece:hover .piece-media img {
+        transform: scale(1.03);
+      }
+      .piece-meta {
+        margin-top: 20px;
+      }
+      .piece-meta h3 {
+        font-size: 1.5rem;
+      }
+      .piece-sector {
+        margin-top: 6px;
+        color: var(--accent);
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+      .piece-line {
+        margin-top: 10px;
+        color: var(--ink-soft);
+        max-width: 44ch;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .piece-media img {
+          transition: none;
+        }
+        .piece:hover .piece-media img {
+          transform: none;
+        }
+      }
+      .piece-meta h3 a {
+        text-decoration: none;
+      }
+      .piece-meta h3 a:hover {
+        color: var(--accent);
+      }
+      @media (min-width: 900px) {
+        .work-stagger {
+          grid-template-columns: repeat(12, 1fr);
+          gap: 72px 48px;
+        }
+        /* Both assets are wide screenshots, so the offset comes from column
+           placement rather than from contrasting aspect ratios. */
+        .piece-0 {
+          grid-column: 1 / span 8;
+        }
+        .piece-1 {
+          grid-column: 6 / span 7;
+        }
+      }
+
+      /* ---------- 6. results band ---------- */
+      .results {
+        background: var(--tint);
+        padding-block: 72px;
+      }
+      .stat-band {
+        margin: 0;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .stat dt {
+        font-size: clamp(2.6rem, 6vw, 4rem);
+        font-weight: 700;
+        letter-spacing: -0.045em;
+        line-height: 1;
+        color: var(--accent);
+      }
+      .stat dd {
+        margin: 12px 0 0;
+        color: var(--ink-soft);
+        max-width: 26ch;
+      }
+      .stat-lg dt {
+        font-size: clamp(3.2rem, 8vw, 5.4rem);
+      }
+      @media (min-width: 900px) {
+        .stat-band {
+          grid-template-columns: 1.4fr 1fr 1fr;
+          gap: 48px;
+          align-items: end;
+        }
+      }
+
+      /* ---------- 7. process rail ---------- */
+      .process {
+        padding-block: 88px;
+      }
+      .process-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .process-head p {
+        color: var(--ink-soft);
+        margin-top: -20px;
+      }
+      .rail {
+        list-style: none;
+        margin: 0;
+        padding: 0 0 0 28px;
+        border-left: 1px solid var(--line);
+        display: grid;
+        gap: 44px;
+      }
+      .rail h3 {
+        font-size: 1.35rem;
+      }
+      .rail p {
+        margin-top: 10px;
+        color: var(--ink-soft);
+        max-width: 54ch;
+      }
+      @media (min-width: 900px) {
+        .process-grid {
+          grid-template-columns: 0.8fr 1.2fr;
+          gap: 64px;
+        }
+        .process-head {
+          position: sticky;
+          top: 108px;
+          align-self: start;
+        }
+      }
+
+      /* ---------- 8. voices ---------- */
+      .voices {
+        padding-block: 88px;
+        border-top: 1px solid var(--line);
+      }
+      .voice-pair {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 56px;
+      }
+      .voice {
+        margin: 0;
+      }
+      .voice blockquote {
+        margin: 0;
+        font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+        line-height: 1.35;
+        letter-spacing: -0.02em;
+        max-width: 26ch;
+      }
+      .voice figcaption {
+        margin-top: 24px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        max-width: 26ch;
+      }
+      .voice figcaption span {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.95rem;
+        color: var(--ink-soft);
+        line-height: 1.35;
+      }
+      .voice figcaption strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      @media (min-width: 900px) {
+        .voice-pair {
+          grid-template-columns: 1fr 1fr;
+          gap: 72px;
+        }
+        .voice-offset {
+          margin-top: 96px;
+        }
+      }
+
+      /* ---------- 9. faq ---------- */
+      .faq {
+        padding-block: 88px;
+      }
+      .faq-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .faq-list details {
+        border-bottom: 1px solid var(--line);
+      }
+      .faq-list details summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 22px 0;
+        font-size: 1.15rem;
+        font-weight: 500;
+      }
+      .faq-list summary::-webkit-details-marker {
+        display: none;
+      }
+      .plus {
+        position: relative;
+        flex: none;
+        width: 16px;
+        height: 16px;
+      }
+      .plus::before,
+      .plus::after {
+        content: "";
+        position: absolute;
+        inset: 50% 0 auto 0;
+        height: 1.5px;
+        background: var(--accent);
+        transition: transform 0.25s var(--ease);
+      }
+      .plus::after {
+        transform: rotate(90deg);
+      }
+      details[open] .plus::after {
+        transform: rotate(0deg);
+      }
+      .faq-list details p {
+        padding: 0 0 24px;
+        color: var(--ink-soft);
+        max-width: 62ch;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .plus::before,
+        .plus::after {
+          transition: none;
+        }
+      }
+      @media (min-width: 900px) {
+        .faq-grid {
+          grid-template-columns: 0.75fr 1.25fr;
+          gap: 56px;
+        }
+        .faq .sec-h {
+          margin-bottom: 0;
+        }
+      }
+
+      /* ---------- 10. contact ---------- */
+      .contact {
+        padding-block: 88px 104px;
+        border-top: 1px solid var(--line);
+      }
+      .contact-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+      .contact-copy h2 {
+        font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+        max-width: 16ch;
+      }
+      .contact-copy p {
+        margin-top: 20px;
+        color: var(--ink-soft);
+        max-width: 42ch;
+      }
+      .contact-direct a {
+        color: var(--accent);
+        font-weight: 500;
+      }
+      .form {
+        display: grid;
+        gap: 20px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--r);
+        padding: 28px;
+      }
+      .field {
+        display: grid;
+        gap: 8px;
+      }
+      .field label {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .field input,
+      .field textarea {
+        font: inherit;
+        font-size: 16px;
+        color: var(--ink);
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: var(--r);
+        padding: 13px 14px;
+        width: 100%;
+        resize: vertical;
+        transition: border-color 0.18s var(--ease);
+      }
+      .field input:hover,
+      .field textarea:hover {
+        border-color: var(--ink-soft);
+      }
+      .field input:focus-visible,
+      .field textarea:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+        border-color: var(--accent);
+      }
+      .hint {
+        font-size: 0.85rem;
+        color: var(--ink-soft);
+      }
+      .err {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--accent);
+      }
+      .field[data-invalid] input,
+      .field[data-invalid] textarea {
+        border-color: var(--accent);
+      }
+      .form-status {
+        font-size: 0.95rem;
+        color: var(--ink-soft);
+      }
+      .form-status[data-tone="ok"] {
+        color: var(--accent);
+        font-weight: 500;
+      }
+      @media (min-width: 900px) {
+        .contact-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 72px;
+        }
+        .form {
+          padding: 36px;
+        }
+      }
+
+      /* ---------- footer ---------- */
+      .site-foot {
+        border-top: 1px solid var(--line);
+        padding-block: 40px 56px;
+      }
+      .foot-inner {
+        display: grid;
+        gap: 20px;
+      }
+      .foot-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 22px;
+        font-size: 0.95rem;
+      }
+      .foot-nav a {
+        color: var(--ink-soft);
+        text-decoration: none;
+      }
+      .foot-nav a:hover {
+        color: var(--ink);
+      }
+      .foot-note {
+        font-size: 0.9rem;
+        color: var(--ink-soft);
+      }
+      @media (min-width: 768px) {
+        .foot-inner {
+          grid-template-columns: auto 1fr auto;
+          align-items: center;
+          gap: 40px;
+        }
+      }
+
+      /* ---------- motion (MOTION_INTENSITY 5) ---------- */
+
+      /* Hero entry. Pure CSS so the LCP element never depends on JS to become visible. */
+      @media (prefers-reduced-motion: no-preference) {
+        [data-enter] {
+          animation: enter 0.7s var(--ease) both;
+        }
+        [data-enter][data-enter-delay="1"] {
+          animation-delay: 0.1s;
+        }
+        @keyframes enter {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: none;
+          }
+        }
+      }
+
+      /* Scroll reveal for everything below the fold. */
+      @media (prefers-reduced-motion: no-preference) {
+        [data-reveal] {
+          opacity: 0;
+          transform: translateY(22px);
+          transition:
+            opacity 0.6s var(--ease),
+            transform 0.6s var(--ease);
+        }
+        [data-reveal][data-reveal-delay="1"] {
+          transition-delay: 0.08s;
+        }
+        [data-reveal][data-reveal-delay="2"] {
+          transition-delay: 0.16s;
+        }
+        [data-reveal].is-in {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+
+    <script>
+      // Theme toggle. Starts from the system preference, remembers an explicit choice.
+      const root = document.documentElement;
+      const toggle = document.querySelector("[data-theme-toggle]");
+      const themeLabel = document.querySelector("[data-theme-label]");
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+      const currentTheme = () =>
+        root.getAttribute("data-theme") || (systemDark.matches ? "dark" : "light");
+
+      const syncToggle = () => {
+        const dark = currentTheme() === "dark";
+        // The label names the destination, so it reads as an action not a status.
+        themeLabel.textContent = dark ? toggle.dataset.toLight : toggle.dataset.toDark;
+        toggle.setAttribute("aria-pressed", String(dark));
+      };
+
+      toggle.addEventListener("click", () => {
+        const next = currentTheme() === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try {
+          localStorage.setItem("theme", next);
+        } catch (e) {}
+        syncToggle();
+      });
+
+      // Follow the OS while the visitor has not made an explicit choice.
+      systemDark.addEventListener("change", () => {
+        if (!root.hasAttribute("data-theme")) syncToggle();
+      });
+
+      syncToggle();
+
+      // Reveal on enter. IntersectionObserver only, no scroll listeners.
+      // Purpose: sequences each section into view so a skimming reader is led down the page.
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const targets = document.querySelectorAll("[data-reveal]");
+
+      if (reduce.matches) {
+        targets.forEach((el) => el.classList.add("is-in"));
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("is-in");
+              io.unobserve(entry.target);
+            });
+          },
+          { threshold: 0.18, rootMargin: "0px 0px -8% 0px" }
+        );
+        targets.forEach((el) => io.observe(el));
+      }
+
+      // Lead form: validation, loading, success and error states.
+      const form = document.getElementById("lead-form");
+      if (form) {
+        const status = form.querySelector("[data-status]");
+        const submit = form.querySelector("[data-submit]");
+        const label = form.querySelector("[data-label]");
+        // Strings come from the rendered markup so the script stays language agnostic.
+        const copy = form.dataset;
+
+        const validate = (el) => {
+          const field = el.closest(".field");
+          const err = form.querySelector(`[data-err-for="${el.id}"]`);
+          const ok = el.checkValidity() && el.value.trim().length > 0;
+          field.toggleAttribute("data-invalid", !ok);
+          err.hidden = ok;
+          el.setAttribute("aria-invalid", String(!ok));
+          return ok;
+        };
+
+        form.querySelectorAll("input, textarea").forEach((el) => {
+          el.addEventListener("blur", () => validate(el));
+          el.addEventListener("input", () => {
+            if (el.closest(".field").hasAttribute("data-invalid")) validate(el);
+          });
+        });
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const fields = [...form.querySelectorAll("input, textarea")];
+          const valid = fields.map(validate).every(Boolean);
+
+          if (!valid) {
+            status.hidden = false;
+            status.removeAttribute("data-tone");
+            status.textContent = copy.msgInvalid;
+            fields.find((el) => el.closest(".field").hasAttribute("data-invalid"))?.focus();
+            return;
+          }
+
+          submit.disabled = true;
+          label.textContent = copy.labelSending;
+          status.hidden = true;
+
+          try {
+            // TODO: point at your real endpoint (Formspree, Resend, Astro action).
+            const res = await fetch(form.action || "/api/lead", {
+              method: "POST",
+              body: new FormData(form),
+            });
+            if (!res.ok) throw new Error("Request failed");
+
+            form.reset();
+            status.hidden = false;
+            status.setAttribute("data-tone", "ok");
+            status.textContent = copy.msgOk;
+          } catch {
+            status.hidden = false;
+            status.removeAttribute("data-tone");
+            status.textContent = copy.msgFail;
+          } finally {
+            submit.disabled = false;
+            label.textContent = copy.labelIdle;
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
