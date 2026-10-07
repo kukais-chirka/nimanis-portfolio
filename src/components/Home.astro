@@ -65,21 +65,7 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
     </script>
     <link rel="preload" as="image" href="/images/nimanis-portrait.webp" />
 
-    {
-      analyticsEnabled && (
-        <Fragment>
-          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
-          <script is:inline define:vars={{ GA_ID }}>
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-              dataLayer.push(arguments);
-            }
-            gtag("js", new Date());
-            gtag("config", GA_ID);
-          </script>
-        </Fragment>
-      )
-    }
+    {/* No analytics tag here on purpose. GA is injected only after consent. */}
   </head>
 
   <body>
@@ -112,7 +98,7 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
           <span class="sr-only">{t.theme.before}</span><span data-theme-label>{t.theme.toDark}</span
           ><span class="sr-only">{t.theme.after}</span>
         </button>
-        <a class="btn btn-primary btn-sm" href="#contact">{t.cta.primary}</a>
+        <a class="btn btn-primary btn-sm" href="#contact" data-cta="nav">{t.cta.primary}</a>
       </div>
     </header>
 
@@ -127,7 +113,7 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
             </h1>
             <p class="lede">{t.hero.lede}</p>
             <div class="hero-cta">
-              <a class="btn btn-primary" href="#contact">{t.cta.primary}</a>
+              <a class="btn btn-primary" href="#contact" data-cta="hero">{t.cta.primary}</a>
               <a class="btn btn-ghost" href="#work">{t.cta.secondary}</a>
             </div>
           </div>
@@ -195,7 +181,7 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
             <ul class="offer-list">
               {t.offer.list.map((item) => <li>{item}</li>)}
             </ul>
-            <a class="btn btn-oncolor" href="#contact">{t.cta.primary}</a>
+            <a class="btn btn-oncolor" href="#contact" data-cta="offer">{t.cta.primary}</a>
           </div>
         </div>
       </section>
@@ -449,10 +435,27 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
           <a href="#faq">{t.nav.faq}</a>
           <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
           <a href={localeMeta[other].path} hreflang={other} lang={other}>{t.lang.switchTo}</a>
+          <button class="foot-link" type="button" data-consent-reopen>{t.consent.manage}</button>
         </nav>
         <p class="foot-note">{t.footer.note}</p>
       </div>
     </footer>
+
+    <!-- Consent banner. Hidden until the script decides it is needed, so a
+         returning visitor who already chose never sees it flash. -->
+    <section class="consent" role="region" aria-label={t.consent.label} data-consent hidden>
+      <div class="shell consent-inner">
+        <p>{t.consent.text}</p>
+        <div class="consent-actions">
+          <button class="btn btn-ghost btn-sm" type="button" data-consent-reject>
+            {t.consent.reject}
+          </button>
+          <button class="btn btn-primary btn-sm" type="button" data-consent-accept>
+            {t.consent.accept}
+          </button>
+        </div>
+      </div>
+    </section>
 
     <style is:global>
       /* ---------- tokens ---------- */
@@ -1425,6 +1428,59 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
         font-size: 0.9rem;
         color: var(--ink-soft);
       }
+      /* Consent withdrawal has to be as easy as giving it, so this sits in the
+         footer nav and looks like the links beside it. */
+      .foot-link {
+        font: inherit;
+        font-size: 0.95rem;
+        color: var(--ink-soft);
+        background: none;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+      }
+      .foot-link:hover {
+        color: var(--ink);
+      }
+
+      /* ---------- consent banner ---------- */
+      .consent {
+        position: fixed;
+        inset: auto 0 0 0;
+        z-index: 40;
+        background: var(--surface);
+        border-top: 1px solid var(--line);
+        padding-block: 16px;
+        box-shadow: 0 -10px 30px rgb(0 0 0 / 0.06);
+      }
+      .consent[hidden] {
+        display: none;
+      }
+      .consent-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px 32px;
+        flex-wrap: wrap;
+      }
+      .consent p {
+        color: var(--ink-soft);
+        font-size: 0.95rem;
+        max-width: 68ch;
+      }
+      .consent-actions {
+        display: flex;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      @media (max-width: 600px) {
+        .consent-actions {
+          width: 100%;
+        }
+        .consent-actions .btn {
+          flex: 1;
+        }
+      }
       @media (min-width: 768px) {
         .foot-inner {
           grid-template-columns: auto 1fr auto;
@@ -1476,6 +1532,70 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
         }
       }
     </style>
+
+    <script is:inline define:vars={{ GA_ID, analyticsEnabled }}>
+      // Consent-gated analytics. Nothing from Google is requested, and no
+      // analytics cookie is set, until the visitor explicitly accepts.
+      (function () {
+        var KEY = "consent";
+        var banner = document.querySelector("[data-consent]");
+        var stored = null;
+        try {
+          stored = localStorage.getItem(KEY);
+        } catch (e) {}
+
+        function loadAnalytics() {
+          if (!analyticsEnabled || window.__gaLoaded) return;
+          window.__gaLoaded = true;
+          var s = document.createElement("script");
+          s.async = true;
+          s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+          document.head.appendChild(s);
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function () {
+            window.dataLayer.push(arguments);
+          };
+          window.gtag("js", new Date());
+          window.gtag("config", GA_ID);
+        }
+
+        function decide(value) {
+          try {
+            localStorage.setItem(KEY, value);
+          } catch (e) {}
+          banner.hidden = true;
+          if (value === "granted") loadAnalytics();
+        }
+
+        if (stored === "granted") loadAnalytics();
+        else if (stored !== "denied") banner.hidden = false;
+
+        banner.querySelector("[data-consent-accept]").addEventListener("click", function () {
+          decide("granted");
+        });
+        banner.querySelector("[data-consent-reject]").addEventListener("click", function () {
+          decide("denied");
+        });
+        document.querySelectorAll("[data-consent-reopen]").forEach(function (el) {
+          el.addEventListener("click", function () {
+            banner.hidden = false;
+            banner.querySelector("[data-consent-accept]").focus();
+          });
+        });
+
+        // Key event for the primary CTAs. Only the anchors that jump to the
+        // form are tagged; the form's own submit button is deliberately not.
+        document.querySelectorAll("[data-cta]").forEach(function (el) {
+          el.addEventListener("click", function () {
+            if (typeof window.gtag !== "function") return;
+            window.gtag("event", "cta-to-form", {
+              cta_location: el.dataset.cta,
+              language: document.documentElement.lang,
+            });
+          });
+        });
+      })();
+    </script>
 
     <script>
       // Theme toggle. Starts from the system preference, remembers an explicit choice.

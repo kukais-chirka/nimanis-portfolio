@@ -244,6 +244,13 @@ export const content = {
       },
     },
     footer: { note: "Mājaslapas pakalpojumu uzņēmumiem. Rīga un attālināti." },
+    consent: {
+      label: "Sīkdatņu piekrišana",
+      text: "Izmantoju Google Analytics sīkdatnes, lai redzētu, kā lapa tiek lietota. Bez tavas piekrišanas tās netiek ielādētas.",
+      accept: "Piekrītu",
+      reject: "Noraidīt",
+      manage: "Sīkdatnes",
+    },
   },
 
   en: {
@@ -431,5 +438,12 @@ export const content = {
       },
     },
     footer: { note: "Websites for service businesses. Riga and remote." },
+    consent: {
+      label: "Cookie consent",
+      text: "I use Google Analytics cookies to see how the site is used. They are not loaded without your consent.",
+      accept: "Accept",
+      reject: "Decline",
+      manage: "Cookies",
+    },
   },
 } as const;
