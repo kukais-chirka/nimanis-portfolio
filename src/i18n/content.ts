@@ -80,6 +80,7 @@ export const content = {
     lang: { label: "Valoda", switchTo: "English" },
     cta: { primary: "Pieteikties", secondary: "Apskatīt darbus" },
     hero: {
+      kicker: "7+ gadi pieredzes web izstrādē",
       headlineA: "Mājaslapas, kas atved",
       headlineB: "klientus, nevis komplimentus.",
       lede: "Veidoju ātras un atrodamas mājaslapas pakalpojumu un veikalu uzņēmumiem, lai tās parādītos augšā Google un AI atbildēs.",
@@ -274,6 +275,7 @@ export const content = {
     lang: { label: "Language", switchTo: "Latviski" },
     cta: { primary: "Book a call", secondary: "See recent work" },
     hero: {
+      kicker: "7+ years of experience in web development",
       headlineA: "Websites that bring",
       headlineB: "customers, not compliments.",
       lede: "I build fast, findable sites for service businesses. Built to rank in Google and AI answers.",

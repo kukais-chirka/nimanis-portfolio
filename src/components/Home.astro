@@ -107,6 +107,7 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
       <section class="hero">
         <div class="shell hero-grid">
           <div class="hero-copy" data-enter>
+            <p class="hero-kicker">{t.hero.kicker}</p>
             <h1>
               {t.hero.headlineA}<br />
               {t.hero.headlineB}
@@ -765,6 +766,14 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
         display: grid;
         gap: 48px;
         align-items: center;
+      }
+      /* Sentence case, not the usual uppercase-tracked eyebrow. It carries real
+         information, so it should read as a fact rather than a section label. */
+      .hero-kicker {
+        color: var(--accent);
+        font-weight: 500;
+        font-size: 0.95rem;
+        margin-bottom: 18px;
       }
       .hero-copy h1 {
         /* Scale is planned against the hero asset: 2 lines at every breakpoint. */
