@@ -53,7 +53,7 @@ export const workAssets = [
 
 // Figures supplied by the business owner. Keep the evidence for the first two
 // on file, and only name a client once that client has confirmed it.
-export const statValues = ["180+", "5/5", "0.9s"];
+export const statValues = ["180+", "5/5", "7+"];
 
 export const offerPriceWas = "490 EUR";
 export const offerPrice = "290 EUR";
@@ -80,7 +80,7 @@ export const content = {
     lang: { label: "Valoda", switchTo: "English" },
     cta: { primary: "Pieteikties", secondary: "Apskatīt darbus" },
     hero: {
-      kicker: "7+ gadi pieredzes web izstrādē",
+      kicker: "7+ gadu pieredze web izstrādē",
       headlineA: "Mājaslapas, kas atved",
       headlineB: "klientus, nevis komplimentus.",
       lede: "Veidoju ātras un atrodamas mājaslapas pakalpojumu un veikalu uzņēmumiem, lai tās parādītos augšā Google un AI atbildēs.",
@@ -105,7 +105,7 @@ export const content = {
         },
         {
           title: "Pieteikumi un rezervācijas",
-          body: "Formas, zvanu pogas un kalendāra saites, kas nonāk tieši tavā e-pastā vai CRM platformā. Piedāvāju arī CRM izstrādi.",
+          body: "Formas, zvanu pogas un kalendāra saites, kas nonāk tavā e-pastā vai CRM. Uzstādu analītiku, lai zini, no kurienes nāk pieteikumi. Piedāvāju arī CRM izstrādi.",
         },
         {
           title: "Reklāmas kampaņas",
@@ -125,6 +125,7 @@ export const content = {
       list: [
         "Funkcionāla mājaslapa, izveidota un palaista",
         "SEO atslēgvārdu izpēte un ieviešana bez papildu maksas",
+        "Google Analytics un pieteikumu uzskaite",
         "Tad 19 EUR mēnesī par hostingu un uzturēšanu",
       ],
     },
@@ -148,7 +149,7 @@ export const content = {
       labels: [
         "jauni pieraksti trīs mēnešos fizioterapijas klīnikai",
         "Google vērtējums uzņēmumiem pēc mūsu sadarbības",
-        "vidējais ielādes laiks 4G telefonā",
+        "gadu pieredze web izstrādē",
       ],
     },
     process: {
@@ -247,7 +248,7 @@ export const content = {
     footer: { note: "Mājaslapas pakalpojumu uzņēmumiem. Rīga un attālināti." },
     consent: {
       label: "Sīkdatņu piekrišana",
-      text: "Izmantoju Google Analytics sīkdatnes, lai redzētu, kā lapa tiek lietota. Bez tavas piekrišanas tās netiek ielādētas.",
+      text: "Šī lapa izmanto sīkdatnes, lai uzlabotu lietošanas pieredzi un analizētu apmeklējumu statistiku.",
       accept: "Piekrītu",
       reject: "Noraidīt",
       manage: "Sīkdatnes",
@@ -300,7 +301,7 @@ export const content = {
         },
         {
           title: "Booking and lead capture",
-          body: "Forms, call buttons and calendar links that land straight in your inbox or your CRM. I build CRMs too.",
+          body: "Forms, call buttons and calendar links that land in your inbox or your CRM. I set up analytics so you know where leads come from. I build CRMs too.",
         },
         {
           title: "Ad campaigns",
@@ -320,6 +321,7 @@ export const content = {
       list: [
         "A complete website, built and launched",
         "SEO keyword research and implementation, at no extra cost",
+        "Google Analytics and lead tracking",
         "Then 19 EUR a month to keep it hosted and running",
       ],
     },
@@ -343,7 +345,7 @@ export const content = {
       labels: [
         "new bookings in three months for a physiotherapy clinic",
         "Google rating for businesses after working together",
-        "median page load on a 4G phone",
+        "years of experience in web development",
       ],
     },
     process: {
@@ -442,7 +444,7 @@ export const content = {
     footer: { note: "Websites for service businesses. Riga and remote." },
     consent: {
       label: "Cookie consent",
-      text: "I use Google Analytics cookies to see how the site is used. They are not loaded without your consent.",
+      text: "This site uses cookies to improve your experience and analyse site traffic.",
       accept: "Accept",
       reject: "Decline",
       manage: "Cookies",
