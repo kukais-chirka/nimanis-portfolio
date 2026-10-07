@@ -3,6 +3,8 @@
 // NOTE: the Latvian copy below needs a native read before launch.
 
 export const SITE = "https://chii-agency.com";
+// GA4 measurement ID. Public by design, safe to commit.
+export const GA_ID = "G-ZCH6FGVFYB";
 export const EMAIL = "krishjanisnimanis@gmail.com";
 export const WORDMARK = "Chii";
 
@@ -53,6 +55,7 @@ export const workAssets = [
 // on file, and only name a client once that client has confirmed it.
 export const statValues = ["180+", "5/5", "0.9s"];
 
+export const offerPriceWas = "490 EUR";
 export const offerPrice = "290 EUR";
 
 export const content = {
@@ -116,6 +119,8 @@ export const content = {
     offer: {
       heading: "Piedāvājums fizioterapijas un masāžas praksēm",
       body: "Uzņemu 3 klientus par fiksētu cenu. Kad 3 atrasti, piedāvājums beidzas.",
+      wasLabel: "Parastā cena",
+      nowLabel: "Piedāvājuma cena",
       list: [
         "Funkcionāla mājaslapa, izveidota un palaista",
         "SEO atslēgvārdu izpēte un ieviešana bez papildu maksas",
@@ -301,6 +306,8 @@ export const content = {
     offer: {
       heading: "A deal for physio and massage studios",
       body: "I am taking on two or three studios at a fixed price. Once those are booked, I close it.",
+      wasLabel: "Regular price",
+      nowLabel: "Offer price",
       list: [
         "A complete website, built and launched",
         "SEO keyword research and implementation, at no extra cost",

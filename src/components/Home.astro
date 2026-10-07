@@ -16,12 +16,18 @@ import {
   workAssets,
   statValues,
   offerPrice,
+  offerPriceWas,
   localeMeta,
   EMAIL,
   SITE,
   WORDMARK,
+  GA_ID,
   type Locale,
 } from "../i18n/content";
+
+// Analytics only loads on the real domain, so local dev and Netlify deploy
+// previews never pollute the GA property with fake traffic.
+const analyticsEnabled = import.meta.env.PROD;
 
 interface Props {
   lang: Locale;
@@ -58,6 +64,22 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
       })();
     </script>
     <link rel="preload" as="image" href="/images/nimanis-portrait.webp" />
+
+    {
+      analyticsEnabled && (
+        <Fragment>
+          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
+          <script is:inline define:vars={{ GA_ID }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", GA_ID);
+          </script>
+        </Fragment>
+      )
+    }
   </head>
 
   <body>
@@ -162,7 +184,14 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
           <div class="offer-panel" data-reveal>
             <h2 id="offer-h">{t.offer.heading}</h2>
             <p class="offer-body">{t.offer.body}</p>
-            <p class="offer-price">{offerPrice}</p>
+            <p class="offer-price">
+              <s class="offer-was">
+                <span class="sr-only">{t.offer.wasLabel}: </span>{offerPriceWas}
+              </s>
+              <span class="offer-now">
+                <span class="sr-only">{t.offer.nowLabel}: </span>{offerPrice}
+              </span>
+            </p>
             <ul class="offer-list">
               {t.offer.list.map((item) => <li>{item}</li>)}
             </ul>
@@ -353,6 +382,10 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
           <form
             class="form"
             id="lead-form"
+            name="lead"
+            method="POST"
+            data-netlify="true"
+            data-netlify-honeypot="bot-field"
             novalidate
             data-reveal
             data-reveal-delay="1"
@@ -362,6 +395,13 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
             data-msg-ok={t.contact.form.ok}
             data-msg-fail={t.contact.form.fail}
           >
+            {/* Netlify needs form-name in the POST body to route the submission. */}
+            <input type="hidden" name="form-name" value="lead" />
+            {/* Bot trap. Real people never see it, so anything in it is spam. */}
+            <p class="hp" aria-hidden="true">
+              <label>Do not fill this in <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+            </p>
+
             <div class="field">
               <label for="f-name">{t.contact.form.name}</label>
               <input id="f-name" name="name" type="text" autocomplete="name" required />
@@ -949,10 +989,23 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
       }
       .offer-price {
         margin-top: 32px;
-        font-size: clamp(3rem, 7vw, 4.6rem);
         font-weight: 700;
         letter-spacing: -0.045em;
         line-height: 1;
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+      }
+      /* Struck price stays above the 3:1 large-text threshold on the accent panel. */
+      .offer-was {
+        font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+        opacity: 0.72;
+        text-decoration-thickness: 0.08em;
+      }
+      .offer-now {
+        font-size: clamp(3rem, 7vw, 4.6rem);
       }
       .offer-list {
         list-style: none;
@@ -1271,6 +1324,10 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
         color: var(--accent);
         font-weight: 500;
       }
+      /* Honeypot. display:none keeps it out of the a11y tree and tab order. */
+      .hp {
+        display: none;
+      }
       .form {
         display: grid;
         gap: 20px;
@@ -1493,7 +1550,7 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
           return ok;
         };
 
-        form.querySelectorAll("input, textarea").forEach((el) => {
+        form.querySelectorAll(".field input, .field textarea").forEach((el) => {
           el.addEventListener("blur", () => validate(el));
           el.addEventListener("input", () => {
             if (el.closest(".field").hasAttribute("data-invalid")) validate(el);
@@ -1502,7 +1559,7 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
 
         form.addEventListener("submit", async (e) => {
           e.preventDefault();
-          const fields = [...form.querySelectorAll("input, textarea")];
+          const fields = [...form.querySelectorAll(".field input, .field textarea")];
           const valid = fields.map(validate).every(Boolean);
 
           if (!valid) {
@@ -1518,10 +1575,12 @@ const work = workAssets.map((w, i) => ({ ...w, ...t.work.items[i] }));
           status.hidden = true;
 
           try {
-            // TODO: point at your real endpoint (Formspree, Resend, Astro action).
-            const res = await fetch(form.action || "/api/lead", {
+            // Netlify Forms: POST url-encoded back to the page itself. The
+            // form-name hidden field tells Netlify which form this is.
+            const res = await fetch(location.pathname, {
               method: "POST",
-              body: new FormData(form),
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams(new FormData(form)),
             });
             if (!res.ok) throw new Error("Request failed");
 
